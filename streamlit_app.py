@@ -76,7 +76,9 @@ st.subheader('Prompt')
 prompt = st.text_input('Write your prompt!')
 st.write("This is your prompt", prompt)
 
-if len(prompt) > 0 and gpt_choice == ":rainbow[GPT3.5]" :
+if "Éric" in prompt or "eric" in prompt
+    prompt_response = "Éric est génial, il adore Catherine!!!")
+elif len(prompt) > 0 and gpt_choice == ":rainbow[GPT3.5]" :
     prompt_response = prompt_open_ai(prompt, 35)
 elif len(prompt) > 0 and gpt_choice == "***GPT4.0***" :
     prompt_response = prompt_open_ai(prompt, 40)
