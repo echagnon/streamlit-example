@@ -3,8 +3,6 @@ import os
 import streamlit as st
 import pandas as pd
 import numpy as np
-from replit import db
-
 
 def format_string(s, max_line_length=100):
     words = s.split()
@@ -57,19 +55,8 @@ def prompt_open_ai(prompt, gptid) :
 # Securely set your API key
 openai.api_key = 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  
 
-if "counter" not in db :
-    db["counter"] = 0
-else :
-    db["counter"] += 1
-
-if "message" not in db :
-    db["message"] = "empty"
-print(db["message"])
-
 prompt = ""
 prompt_response = ""
-
-print ("this is counter : ", db["counter"])
 
 st.set_page_config(
     page_title="Exploration of possibilities",
@@ -94,7 +81,7 @@ if len(prompt) > 0 and gpt_choice == ":rainbow[GPT3.5]" :
 elif len(prompt) > 0 and gpt_choice == "***GPT4.0***" :
     prompt_response = prompt_open_ai(prompt, 40)
 else :
-    prompt_response = "No response yet :" + str(db["counter"]) + " " + db["message"]
+    prompt_response = "No response yet :"
 
 st.write("This is the response, ", gpt_choice, " says :", prompt_response)
     
