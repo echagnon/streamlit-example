@@ -1,40 +1,113 @@
-import altair as alt
-import numpy as np
-import pandas as pd
+import openai
+import os
 import streamlit as st
+import pandas as pd
+import numpy as np
+from replit import db
 
-"""
-# Welcome to Streamlit!
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+def format_string(s, max_line_length=100):
+    words = s.split()
+    formatted_string = ""
+    current_line = ""
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+    for word in words:
+        if len(current_line) + len(word) + 1 <= max_line_length:
+            current_line += word + " "
+        else:
+            formatted_string += current_line.strip() + "\n"
+            current_line = word + " "
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+    # Add the last line if it contains any words
+    if current_line:
+        formatted_string += current_line.strip()
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+    return formatted_string
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+def prompt_open_ai(prompt, gptid) :
+    # Make the API call
+    use_model = ""
+    answer = ""
+    if gptid == 35 : 
+        use_model = "gpt-3.5-turbo"
+    elif gptid == 40 : 
+        use_model = "gpt-4-1106-preview"
+    else :
+        use_model = "gpt-3.5-turbo"
+   
+    response = openai.chat.completions.create(
+        model=use_model,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    
+    if response.choices:
+        message = response.choices[0].message.content  
+    else : 
+        message = "No message available."
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+    answer = format_string(message)
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+    print(answer)
+    
+    return answer
+        
+# Securely set your API key
+openai.api_key = os.environ['openai_key']  
+
+if "counter" not in db :
+    db["counter"] = 0
+else :
+    db["counter"] += 1
+
+if "message" not in db :
+    db["message"] = "empty"
+print(db["message"])
+
+prompt = ""
+prompt_response = ""
+
+print ("this is counter : ", db["counter"])
+
+st.set_page_config(
+    page_title="Exploration of possibilities",
+    page_icon="🧊",
+)
+
+# Expander section
+with st.expander("Instructions"):
+  st.write("""Enter a prompt to see the answer given by different GPTs""")
+
+gpt_choice = st.radio(
+    "Which GPT do you want to use?",
+    [":rainbow[GPT3.5]", "***GPT4.0***"],
+    captions = ["Most economical", "Best of the best"])
+
+st.subheader('Prompt')
+prompt = st.text_input('Write your prompt!')
+st.write("This is your prompt", prompt)
+
+if len(prompt) > 0 and gpt_choice == ":rainbow[GPT3.5]" :
+    prompt_response = prompt_open_ai(prompt, 35)
+elif len(prompt) > 0 and gpt_choice == "***GPT4.0***" :
+    prompt_response = prompt_open_ai(prompt, 40)
+else :
+    prompt_response = "No response yet :" + str(db["counter"]) + " " + db["message"]
+
+st.write("This is the response, ", gpt_choice, " says :", prompt_response)
+    
+# Survey section
+st.write('Which GPT do you prefer? 🍨')
+prefer_gpt35 = st.checkbox('I prefer GPT3.5')
+prefer_gpt40 = st.checkbox('I prefer GPT4.0')
+if prefer_gpt35:
+    st.write('Retro tastes!!!')
+    st.image("https://i.gifer.com/DJR3.gif", width=400)
+if prefer_gpt40:
+    st.write('Modern lover!!! 😒') 
+    st.image("https://i.gifer.com/DJR3.gif", width=400)
+
+
+
