@@ -53,7 +53,7 @@ def prompt_open_ai(prompt, gptid) :
     return answer
         
 # Securely set your API key
-openai.api_key = OPEN_AI_KEY
+openai.api_key = st.secrets["OPEN_AI_KEY"]
 
 prompt = ""
 prompt_response = ""
