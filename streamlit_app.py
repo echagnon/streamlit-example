@@ -55,7 +55,7 @@ def prompt_open_ai(prompt, gptid) :
     return answer
         
 # Securely set your API key
-openai.api_key = os.environ['openai_key']  
+openai.api_key = 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  
 
 if "counter" not in db :
     db["counter"] = 0
